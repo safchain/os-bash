@@ -48,7 +48,26 @@ function tun_delete() {
     if [ -z "$1" ]; then
         _fatal "Usage: $0 tun-delete <tun name>"
     fi
-     $_RH ovs-vsctl del-br $1
+
+    $_RH ovs-vsctl del-br br-$1
+}
+
+function link_create() {
+    if [ -z "$1" ]; then
+        _fatal "Usage: $0 link_create <link name>"
+    fi
+
+    $_RH ip l add name $1-l type veth peer name $1-r
+    $_RH ip l set $1-l up
+    $_RH ip l set $1-r up
+}
+
+function link_delete() {
+    if [ -z "$1" ]; then
+        _fatal "Usage: $0 link_delete <link name>"
+    fi
+
+    $_RH ip l delete $1-l
 }
 
 case $1 in
@@ -60,6 +79,10 @@ case $1 in
         tun_create $2 $3;;
     tun-delete)
         tun_delete $2;;
+    link-create)
+        link_create $2;;
+    link-delete)
+        link_delete $2;;
     *)
         _fatal "Not valid operation $1";;
 esac
